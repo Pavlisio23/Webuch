@@ -46,6 +46,7 @@ def init_db():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
 
+        # Таблица пользователей
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,6 +57,23 @@ def init_db():
             )
         ''')
 
+        # Таблица матчей
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS matches (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                team1 TEXT NOT NULL,
+                team2 TEXT NOT NULL,
+                score1 INTEGER DEFAULT 0,
+                score2 INTEGER DEFAULT 0,
+                time TEXT,
+                event TEXT,
+                map TEXT,
+                status TEXT DEFAULT 'upcoming',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        # Таблица комментариев
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,14 +81,23 @@ def init_db():
                 user_id INTEGER NOT NULL,
                 text TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id)
+                FOREIGN KEY(user_id) REFERENCES users(id),
+                FOREIGN KEY(match_id) REFERENCES matches(id)
             )
         ''')
 
+        # Добавим тестовые матчи, если таблица пуста
+        if cursor.execute('SELECT COUNT(*) FROM matches').fetchone()[0] == 0:
+            test_matches = [
+                (1, 'NaVi', 'Vitality', 0, 0, '2023-10-15 19:00', 'IEM Cologne 2023', 'Mirage', 'upcoming'),
+                (2, 'Faze Clan', 'Heroic', 0, 0, '2023-10-16 20:00', 'ESL Pro League S18', 'Inferno', 'upcoming')
+            ]
+            cursor.executemany('''
+                INSERT INTO matches (id, team1, team2, score1, score2, time, event, map, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', test_matches)
+
         conn.commit()
-
-
-init_db()
 
 
 # Вспомогательные функции БД
@@ -220,19 +247,22 @@ def match_detail(match_id):
 @login_required
 def profile():
     with get_db() as conn:
-        user_comments = conn.execute('''
-            SELECT comments.*, matches.team1, matches.team2 
-            FROM comments 
-            JOIN matches ON comments.match_id = matches.id
-            WHERE user_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT 5
-        ''', (session['user_id'],)).fetchall()
+        try:
+            user_comments = conn.execute('''
+                SELECT comments.*, matches.team1, matches.team2 
+                FROM comments 
+                JOIN matches ON comments.match_id = matches.id
+                WHERE comments.user_id = ? 
+                ORDER BY comments.created_at DESC 
+                LIMIT 5
+            ''', (session['user_id'],)).fetchall()
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            user_comments = []
 
     return render_template('profile.html',
                            username=session.get('username'),
                            comments=user_comments)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
