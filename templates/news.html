@@ -1,0 +1,28 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>All Matches</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Team 1</th>
+                <th>Team 2</th>
+                <th>Event</th>
+                <th>Time</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+            <tr>
+                <td>{{ match.team1 }}</td>
+                <td>{{ match.team2 }}</td>
+                <td>{{ match.event }}</td>
+                <td>{{ match.time }}</td>
+                <td><a href="/match/{{ match.id }}" class="btn btn-sm btn-info">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

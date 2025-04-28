@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Upcoming Matches</h2>
+    <div class="row">
+        {% for match in matches %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
+                    <p class="card-text">
+                        {{ match.event }}<br>
+                        <small class="text-muted">{{ match.time }}</small>
+                    </p>
+                    <a href="/match/{{ match.id }}" class="btn btn-primary">Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2>Latest News</h2>
+    {% for item in news %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.content }}</p>
+            <small class="text-muted">{{ item.date }}</small>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

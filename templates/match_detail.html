@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ match.team1 }} vs {{ match.team2 }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2>{{ match.team1 }} vs {{ match.team2 }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <h3>{{ match.team1 }}</h3>
+                        <div class="display-4">{{ match.score1 }}</div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h3>{{ match.team2 }}</h3>
+                        <div class="display-4">{{ match.score2 }}</div>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Турнир:</strong> {{ match.event }}</p>
+                <p><strong>Карта:</strong> {{ match.map }}</p>
+                <p><strong>Время:</strong> {{ match.time }}</p>
+                <p><strong>Статус:</strong>
+                    <span class="badge bg-{{ 'success' if match.status == 'live' else 'warning' }}">
+                        {{ 'В ПРЯМОМ ЭФИРЕ' if match.status == 'live' else 'Предстоящий' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Комментарии</h3>
+            </div>
+            <div class="card-body">
+                {% if 'user_id' in session %}
+                <form method="POST" class="mb-4">
+                    <div class="mb-3">
+                        <textarea class="form-control" name="comment" rows="3"
+                                  placeholder="Ваш комментарий..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+                {% else %}
+                <div class="alert alert-info">
+                    <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
+                       class="alert-link">Войдите</a>, чтобы оставлять комментарии
+                </div>
+                {% endif %}
+
+                {% for comment in comments %}
+                <div class="mb-3 comment-box">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ comment.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at }}</small>
+                    </div>
+                    <p>{{ comment.text }}</p>
+                </div>
+                {% else %}
+                <p class="text-muted">Пока нет комментариев. Будьте первым!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
