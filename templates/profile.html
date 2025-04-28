@@ -1,14 +1,29 @@
 {% extends "base.html" %}
 
+{% block title %}Profile{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <h2>Profile Page</h2>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Welcome, {{ username }}!</h5>
-                <p class="card-text">Your personal statistics and settings will be here.</p>
-            </div>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>User Profile: {{ username }}</h3>
+        </div>
+        <div class="card-body">
+            <h4>Your Recent Comments</h4>
+
+            {% if comments %}
+                {% for comment in comments %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ comment.team1 }} vs {{ comment.team2 }}</h5>
+                        <p class="card-text">{{ comment.text }}</p>
+                        <small class="text-muted">{{ comment.created_at }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>You haven't posted any comments yet.</p>
+            {% endif %}
         </div>
     </div>
 </div>

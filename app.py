@@ -14,23 +14,15 @@ matches = [
         'id': 1,
         'team1': 'NaVi',
         'team2': 'Vitality',
-        'score1': 0,
-        'score2': 0,
         'time': '2023-10-15 19:00',
-        'event': 'IEM Cologne 2023',
-        'map': 'Mirage',
-        'status': 'upcoming'
+        'event': 'IEM Cologne 2023'
     },
     {
         'id': 2,
         'team1': 'Faze Clan',
         'team2': 'Heroic',
-        'score1': 0,
-        'score2': 0,
         'time': '2023-10-16 20:00',
-        'event': 'ESL Pro League S18',
-        'map': 'Inferno',
-        'status': 'upcoming'
+        'event': 'ESL Pro League S18'
     }
 ]
 
@@ -92,7 +84,7 @@ def get_db():
 def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Пожалуйста, войдите для доступа к этой странице', 'warning')
+            flash('Please login to access this page', 'warning')
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
 
@@ -108,7 +100,7 @@ def register():
         email = request.form.get('email', '').strip()
 
         if not username or not password:
-            flash('Имя пользователя и пароль обязательны!', 'danger')
+            flash('Username and password are required!', 'danger')
             return redirect(url_for('register'))
 
         try:
@@ -118,10 +110,10 @@ def register():
                              (username, hashed_pw, email))
                 conn.commit()
 
-            flash('Регистрация успешна! Теперь вы можете войти.', 'success')
+            flash('Registration successful! Please login.', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            flash('Это имя пользователя уже занято!', 'danger')
+            flash('Username already taken!', 'danger')
 
     return render_template('register.html')
 
@@ -141,10 +133,10 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
-            flash(f'Добро пожаловать, {user["username"]}!', 'success')
-            return redirect(url_for('profile'))
+            flash(f'Welcome, {user["username"]}!', 'success')
+            return render_template('profile.html')
         else:
-            flash('Неверное имя пользователя или пароль', 'danger')
+            flash('Invalid username or password', 'danger')
 
     return render_template('login.html')
 
@@ -152,7 +144,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Вы успешно вышли из системы', 'info')
+    flash('You have been logged out', 'info')
     return redirect(url_for('home'))
 
 
@@ -181,7 +173,7 @@ def news_list():
 def match_detail(match_id):
     match = next((m for m in matches if m['id'] == match_id), None)
     if not match:
-        flash('Матч не найден', 'danger')
+        flash('Match not found', 'danger')
         return redirect(url_for('matches_list'))
 
     # Получаем комментарии
@@ -197,12 +189,12 @@ def match_detail(match_id):
     # Обработка нового комментария
     if request.method == 'POST':
         if 'user_id' not in session:
-            flash('Войдите, чтобы оставлять комментарии', 'warning')
+            flash('Please login to comment', 'warning')
             return redirect(url_for('login', next=url_for('match_detail', match_id=match_id)))
 
         comment_text = request.form.get('comment', '').strip()
         if not comment_text:
-            flash('Комментарий не может быть пустым', 'danger')
+            flash('Comment cannot be empty', 'danger')
         else:
             try:
                 with get_db() as conn:
@@ -211,10 +203,10 @@ def match_detail(match_id):
                         (match_id, session['user_id'], comment_text)
                     )
                     conn.commit()
-                flash('Комментарий добавлен', 'success')
+                flash('Comment added', 'success')
                 return redirect(url_for('match_detail', match_id=match_id))
             except Exception as e:
-                flash('Ошибка при добавлении комментария', 'danger')
+                flash('Error adding comment', 'danger')
                 print(f"Error adding comment: {e}")
 
     return render_template('match_detail.html',
@@ -223,12 +215,15 @@ def match_detail(match_id):
                            user_id=session.get('user_id'))
 
 
+# Добавленный маршрут профиля
 @app.route('/profile')
 @login_required
 def profile():
     with get_db() as conn:
         user_comments = conn.execute('''
-            SELECT * FROM comments 
+            SELECT comments.*, matches.team1, matches.team2 
+            FROM comments 
+            JOIN matches ON comments.match_id = matches.id
             WHERE user_id = ? 
             ORDER BY created_at DESC 
             LIMIT 5
