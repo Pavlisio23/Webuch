@@ -1,28 +1,32 @@
-
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>All Matches</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Team 1</th>
-                <th>Team 2</th>
-                <th>Event</th>
-                <th>Time</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-            <tr>
-                <td>{{ match.team1 }}</td>
-                <td>{{ match.team2 }}</td>
-                <td>{{ match.event }}</td>
-                <td>{{ match.time }}</td>
-                <td><a href="/match/{{ match.id }}" class="btn btn-sm btn-info">View</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<h2>Upcoming Matches</h2>
+<div class="row">
+    {% for match in matches %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
+                <p class="card-text">
+                    {{ match.event }}<br>
+                    <small class="text-muted">{{ match.time }}</small>
+                </p>
+                <a href="/match/{{ match.id }}" class="btn btn-primary">Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<h2>Latest News</h2>
+{% for item in news %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ item.title }}</h5>
+        <p class="card-text">{{ item.content }}</p>
+        <small class="text-muted">{{ item.date }}</small>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

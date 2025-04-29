@@ -1,44 +1,22 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask import *
+from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+from data import db_session
+from data import teams_api
+from data.mathes import Match
+from data.teams import Team
+from data.news import News
 
 app = Flask(__name__)
 app.secret_key = 'your_very_secret_key_here'  # Замените на реальный секретный ключ!
+api = Api(app)
 
 # Конфигурация БД
-DATABASE = 'database.db'
+DATABASE = 'db/database.db'
 
-# Мок-данные
-matches = [
-    {
-        'id': 1,
-        'team1': 'NaVi',
-        'team2': 'Vitality',
-        'time': '2023-10-15 19:00',
-        'event': 'IEM Cologne 2023'
-    },
-    {
-        'id': 2,
-        'team1': 'Faze Clan',
-        'team2': 'Heroic',
-        'time': '2023-10-16 20:00',
-        'event': 'ESL Pro League S18'
-    }
-]
 
-news = [
-    {
-        'title': 'Major announcement: New CS2 tournament',
-        'date': '2023-10-10',
-        'content': 'Valve announces new championship series...'
-    }
-]
 
-teams = [
-    {'name': 'NaVi', 'rank': 1},
-    {'name': 'Vitality', 'rank': 2},
-    {'name': 'Faze Clan', 'rank': 3}
-]
 
 
 # Инициализация БД
@@ -46,7 +24,6 @@ def init_db():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
 
-        # Таблица пользователей
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,23 +34,6 @@ def init_db():
             )
         ''')
 
-        # Таблица матчей
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS matches (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                team1 TEXT NOT NULL,
-                team2 TEXT NOT NULL,
-                score1 INTEGER DEFAULT 0,
-                score2 INTEGER DEFAULT 0,
-                time TEXT,
-                event TEXT,
-                map TEXT,
-                status TEXT DEFAULT 'upcoming',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-
-        # Таблица комментариев
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,23 +41,14 @@ def init_db():
                 user_id INTEGER NOT NULL,
                 text TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(match_id) REFERENCES matches(id)
+                FOREIGN KEY(user_id) REFERENCES users(id)
             )
         ''')
 
-        # Добавим тестовые матчи, если таблица пуста
-        if cursor.execute('SELECT COUNT(*) FROM matches').fetchone()[0] == 0:
-            test_matches = [
-                (1, 'NaVi', 'Vitality', 0, 0, '2023-10-15 19:00', 'IEM Cologne 2023', 'Mirage', 'upcoming'),
-                (2, 'Faze Clan', 'Heroic', 0, 0, '2023-10-16 20:00', 'ESL Pro League S18', 'Inferno', 'upcoming')
-            ]
-            cursor.executemany('''
-                INSERT INTO matches (id, team1, team2, score1, score2, time, event, map, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', test_matches)
-
         conn.commit()
+
+
+init_db()
 
 
 # Вспомогательные функции БД
@@ -178,27 +129,41 @@ def logout():
 # Основные маршруты
 @app.route('/')
 def home():
+    db_sess = db_session.create_session()
+    matches = db_sess.query(Match).all()
+    db_sess = db_session.create_session()
+    news = db_sess.query(News).all()
     return render_template('base.html', matches=matches, news=news)
 
 
 @app.route('/matches')
 def matches_list():
+    db_sess = db_session.create_session()
+    matches = db_sess.query(Match).all()
     return render_template('matches.html', matches=matches)
 
 
 @app.route('/teams')
 def teams_list():
+    db_sess = db_session.create_session()
+    teams = db_sess.query(Team).all()
     return render_template('teams.html', teams=teams)
 
 
 @app.route('/news')
 def news_list():
-    return render_template('news.html', news=news)
+    db_sess = db_session.create_session()
+    news = db_sess.query(News).all()
+    db_sess = db_session.create_session()
+    matches = db_sess.query(Match).all()
+    return render_template('news.html', news=news, matches=matches)
 
 
 @app.route('/match/<int:match_id>', methods=['GET', 'POST'])
 def match_detail(match_id):
-    match = next((m for m in matches if m['id'] == match_id), None)
+    db_sess = db_session.create_session()
+    matches = db_sess.query(Match).all()
+    match = next((m for m in matches if m.id == match_id), None)
     if not match:
         flash('Match not found', 'danger')
         return redirect(url_for('matches_list'))
@@ -247,22 +212,30 @@ def match_detail(match_id):
 @login_required
 def profile():
     with get_db() as conn:
-        try:
-            user_comments = conn.execute('''
-                SELECT comments.*, matches.team1, matches.team2 
-                FROM comments 
-                JOIN matches ON comments.match_id = matches.id
-                WHERE comments.user_id = ? 
-                ORDER BY comments.created_at DESC 
-                LIMIT 5
-            ''', (session['user_id'],)).fetchall()
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
-            user_comments = []
+        user_comments = conn.execute('''
+            SELECT comments.*, matches.team1, matches.team2 
+            FROM comments 
+            JOIN matches ON comments.match_id = matches.id
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        ''', (session['user_id'],)).fetchall()
 
     return render_template('profile.html',
                            username=session.get('username'),
                            comments=user_comments)
 
+
+@app.errorhandler(400)
+def bad_request(_):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
+
+
+def main():
+    db_session.global_init("db/news_match_teams.db")
+    app.register_blueprint(teams_api.blueprint)
+    app.run(port=8080, host='127.0.0.1')
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()

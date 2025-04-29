@@ -23,10 +23,10 @@
                 <hr>
                 <p><strong>Турнир:</strong> {{ match.event }}</p>
                 <p><strong>Карта:</strong> {{ match.map }}</p>
-                <p><strong>Время:</strong> {{ match.time }}</p>
+                <p><strong>Время:</strong> {{ match.date }}</p>
                 <p><strong>Статус:</strong>
-                    <span class="badge bg-{{ 'success' if match.status == 'live' else 'warning' }}">
-                        {{ 'В ПРЯМОМ ЭФИРЕ' if match.status == 'live' else 'Предстоящий' }}
+                    <span class="badge bg-{{ 'success' if match.category == 'live' else 'warning' }}">
+                        {{ 'В ПРЯМОМ ЭФИРЕ' if match.category == 'live' else 'Предстоящий' }}
                     </span>
                 </p>
             </div>
