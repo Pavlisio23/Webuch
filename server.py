@@ -16,9 +16,6 @@ api = Api(app)
 DATABASE = 'db/database.db'
 
 
-
-
-
 # Инициализация БД
 def init_db():
     with sqlite3.connect(DATABASE) as conn:
