@@ -148,6 +148,13 @@ def teams_list():
     return render_template('teams.html', teams=teams)
 
 
+@app.route('/set_language/<language>')
+def set_language(language):
+    if language in ['en', 'ru']:
+        session['language'] = language
+    return redirect(request.referrer or url_for('home'))
+
+
 @app.route('/news')
 def news_list():
     # db_sess = db_session.create_session()

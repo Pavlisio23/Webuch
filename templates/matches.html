@@ -1,15 +1,14 @@
-
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>All Matches</h2>
+    <h2>{% if session.get('language', 'en') == 'ru' %}Все матчи{% else %}All Matches{% endif %}</h2>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Team 1</th>
-                <th>Team 2</th>
-                <th>Event</th>
-                <th>Time</th>
+                <th>{% if session.get('language', 'en') == 'ru' %}Команда 1{% else %}Team 1{% endif %}</th>
+                <th>{% if session.get('language', 'en') == 'ru' %}Команда 2{% else %}Team 2{% endif %}</th>
+                <th>{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Event{% endif %}</th>
+                <th>{% if session.get('language', 'en') == 'ru' %}Время{% else %}Time{% endif %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -20,7 +19,11 @@
                 <td>{{ match.team2 }}</td>
                 <td>{{ match.event }}</td>
                 <td>{{ match.time }}</td>
-                <td><a href="/match/{{ match.id }}" class="btn btn-sm btn-info">View</a></td>
+                <td>
+                    <a href="/match/{{ match.id }}" class="btn btn-sm btn-info">
+                        {% if session.get('language', 'en') == 'ru' %}Просмотр{% else %}View{% endif %}
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

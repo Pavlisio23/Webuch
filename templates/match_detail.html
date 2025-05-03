@@ -21,12 +21,16 @@
                     </div>
                 </div>
                 <hr>
-                <p><strong>Турнир:</strong> {{ match.event }}</p>
-                <p><strong>Карта:</strong> {{ match.map }}</p>
-                <p><strong>Время:</strong> {{ match.date }}</p>
-                <p><strong>Статус:</strong>
+                <p><strong>{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Tournament{% endif %}:</strong> {{ match.event }}</p>
+                <p><strong>{% if session.get('language', 'en') == 'ru' %}Карта{% else %}Map{% endif %}:</strong> {{ match.map }}</p>
+                <p><strong>{% if session.get('language', 'en') == 'ru' %}Время{% else %}Time{% endif %}:</strong> {{ match.date }}</p>
+                <p><strong>{% if session.get('language', 'en') == 'ru' %}Статус{% else %}Status{% endif %}:</strong>
                     <span class="badge bg-{{ 'success' if match.category == 'live' else 'warning' }}">
-                        {{ 'В ПРЯМОМ ЭФИРЕ' if match.category == 'live' else 'Предстоящий' }}
+                        {% if match.category == 'live' %}
+                            {% if session.get('language', 'en') == 'ru' %}В ПРЯМОМ ЭФИРЕ{% else %}LIVE{% endif %}
+                        {% else %}
+                            {% if session.get('language', 'en') == 'ru' %}Предстоящий{% else %}Upcoming{% endif %}
+                        {% endif %}
                     </span>
                 </p>
             </div>
@@ -34,21 +38,28 @@
 
         <div class="card">
             <div class="card-header">
-                <h3>Комментарии</h3>
+                <h3>{% if session.get('language', 'en') == 'ru' %}Комментарии{% else %}Comments{% endif %}</h3>
             </div>
             <div class="card-body">
                 {% if 'user_id' in session %}
                 <form method="POST" class="mb-4">
                     <div class="mb-3">
                         <textarea class="form-control" name="comment" rows="3"
-                                  placeholder="Ваш комментарий..." required></textarea>
+                                  placeholder="{% if session.get('language', 'en') == 'ru' %}Ваш комментарий...{% else %}Your comment...{% endif %}" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Отправить</button>
+                    <button type="submit" class="btn btn-primary">
+                        {% if session.get('language', 'en') == 'ru' %}Отправить{% else %}Submit{% endif %}
+                    </button>
                 </form>
                 {% else %}
                 <div class="alert alert-info">
+                    {% if session.get('language', 'en') == 'ru' %}
                     <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
                        class="alert-link">Войдите</a>, чтобы оставлять комментарии
+                    {% else %}
+                    <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
+                       class="alert-link">Login</a> to post comments
+                    {% endif %}
                 </div>
                 {% endif %}
 
@@ -61,7 +72,13 @@
                     <p>{{ comment.text }}</p>
                 </div>
                 {% else %}
-                <p class="text-muted">Пока нет комментариев. Будьте первым!</p>
+                <p class="text-muted">
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Пока нет комментариев. Будьте первым!
+                    {% else %}
+                    No comments yet. Be the first!
+                    {% endif %}
+                </p>
                 {% endfor %}
             </div>
         </div>

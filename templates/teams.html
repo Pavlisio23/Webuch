@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Team Rankings (2025)</h2>
+    <h2>{% if session.get('language', 'en') == 'ru' %}Рейтинг команд (2025){% else %}Team Rankings (2025){% endif %}</h2>
     <table class="table" style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="background-color: #f2f2f2;">
-                <th style="padding: 12px; text-align: left;">Rank</th>
-                <th style="padding: 12px; text-align: left;">Team</th>
-                <th style="padding: 12px; text-align: left;">Players</th>
+                <th style="padding: 12px; text-align: left;">
+                    {% if session.get('language', 'en') == 'ru' %}Место{% else %}Rank{% endif %}
+                </th>
+                <th style="padding: 12px; text-align: left;">
+                    {% if session.get('language', 'en') == 'ru' %}Команда{% else %}Team{% endif %}
+                </th>
+                <th style="padding: 12px; text-align: left;">
+                    {% if session.get('language', 'en') == 'ru' %}Игроки{% else %}Players{% endif %}
+                </th>
             </tr>
         </thead>
         <tbody>

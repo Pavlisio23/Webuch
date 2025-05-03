@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session.get('language', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CounterStrikeHUB</title>
+    <title>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -39,45 +39,77 @@
             font-weight: bold;
             font-size: 1.5rem;
         }
+        .language-switcher {
+            display: inline-flex;
+            gap: 5px;
+            margin-right: 15px;
+        }
+        .language-switcher .active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="{{ url_for('home') }}">CounterStrikeHUB</a>
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="language-switcher">
+                <a href="{{ url_for('set_language', language='en') }}"
+                   class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'en' %}active{% endif %}">EN</a>
+                <a href="{{ url_for('set_language', language='ru') }}"
+                   class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'ru' %}active{% endif %}">RU</a>
+            </div>
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('home') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Главная{% else %}Home{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('matches_list') }}">Matches</a>
+                    <a class="nav-link" href="{{ url_for('matches_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Матчи{% else %}Matches{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teams_list') }}">Teams</a>
+                    <a class="nav-link" href="{{ url_for('teams_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Команды{% else %}Teams{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('news_list') }}">News</a>
+                    <a class="nav-link" href="{{ url_for('news_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Новости{% else %}News{% endif %}
+                    </a>
                 </li>
             </ul>
             <ul class="navbar-nav">
                 {% if 'user_id' in session %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                    <a class="nav-link" href="{{ url_for('profile') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Профиль{% else %}Profile{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="nav-link" href="{{ url_for('logout') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Выйти{% else %}Logout{% endif %}
+                    </a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-link" href="{{ url_for('login') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Вход{% else %}Login{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    <a class="nav-link" href="{{ url_for('register') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Регистрация{% else %}Register{% endif %}
+                    </a>
                 </li>
                 {% endif %}
             </ul>
@@ -102,8 +134,14 @@
 <!-- Hero Section -->
 <div class="hero-section text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold">CounterStrikeHUB</h1>
-        <p class="lead">Your universal guide to the world of CS</p>
+        <h1 class="display-4 fw-bold">{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</h1>
+        <p class="lead">
+            {% if session.get('language', 'en') == 'ru' %}
+            Ваш универсальный гид в мире CS
+            {% else %}
+            Your universal guide to the world of CS
+            {% endif %}
+        </p>
     </div>
 </div>
 
@@ -113,38 +151,58 @@
     <div class="row">
         <!-- Upcoming Matches -->
         <div class="col-md-6">
-            <h2 class="mb-4"><i class="bi bi-calendar-event"></i> Upcoming Matches</h2>
+            <h2 class="mb-4"><i class="bi bi-calendar-event"></i> {% if session.get('language', 'en') == 'ru' %}Ближайшие матчи{% else %}Upcoming Matches{% endif %}</h2>
             {% for match in matches %}
             <div class="card match-card">
                 <div class="card-body">
                     <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ match.formatted_date }}</h6>
                     <p class="card-text">{{ match.description|default('No description available', true) }}</p>
-                    <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-primary">View Details</a>
+                    <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-primary">
+                        {% if session.get('language', 'en') == 'ru' %}Подробнее{% else %}View Details{% endif %}
+                    </a>
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info">No upcoming matches scheduled.</div>
+            <div class="alert alert-info">
+                {% if session.get('language', 'en') == 'ru' %}
+                Нет запланированных матчей
+                {% else %}
+                No upcoming matches scheduled
+                {% endif %}
+            </div>
             {% endfor %}
-            <a href="{{ url_for('matches_list') }}" class="btn btn-outline-primary mt-2">View All Matches</a>
+            <a href="{{ url_for('matches_list') }}" class="btn btn-outline-primary mt-2">
+                {% if session.get('language', 'en') == 'ru' %}Все матчи{% else %}View All Matches{% endif %}
+            </a>
         </div>
 
         <!-- Latest News -->
         <div class="col-md-6">
-            <h2 class="mb-4"><i class="bi bi-newspaper"></i> Latest News</h2>
+            <h2 class="mb-4"><i class="bi bi-newspaper"></i> {% if session.get('language', 'en') == 'ru' %}Последние новости{% else %}Latest News{% endif %}</h2>
             {% for item in news %}
             <div class="card news-card">
                 <div class="card-body">
                     <h5 class="card-title">{{ item.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ item.formatted_date }}</h6>
                     <p class="card-text">{{ item.content[:150] }}...</p>
-                    <a href="#" class="btn btn-danger">Read More</a>
+                    <a href="#" class="btn btn-danger">
+                        {% if session.get('language', 'en') == 'ru' %}Читать{% else %}Read More{% endif %}
+                    </a>
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info">No news articles available.</div>
+            <div class="alert alert-info">
+                {% if session.get('language', 'en') == 'ru' %}
+                Нет доступных новостей
+                {% else %}
+                No news articles available
+                {% endif %}
+            </div>
             {% endfor %}
-            <a href="{{ url_for('news_list') }}" class="btn btn-outline-danger mt-2">View All News</a>
+            <a href="{{ url_for('news_list') }}" class="btn btn-outline-danger mt-2">
+                {% if session.get('language', 'en') == 'ru' %}Все новости{% else %}View All News{% endif %}
+            </a>
         </div>
     </div>
     {% endblock %}
@@ -155,27 +213,47 @@
     <div class="container text-center">
         <div class="row">
             <div class="col-md-4">
-                <h5>CounterStrikeHUB</h5>
-                <p>Your first step to learning all the news in the CS world</p>
+                <h5>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</h5>
+                <p>
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Ваш источник новостей о CS
+                    {% else %}
+                    Your CS news source
+                    {% endif %}
+                </p>
             </div>
             <div class="col-md-4">
-                <h5>Quick Links</h5>
+                <h5>{% if session.get('language', 'en') == 'ru' %}Быстрые ссылки{% else %}Quick Links{% endif %}</h5>
                 <ul class="list-unstyled">
-                    <li><a href="{{ url_for('home') }}" class="text-white">Home</a></li>
-                    <li><a href="{{ url_for('matches_list') }}" class="text-white">Matches</a></li>
-                    <li><a href="{{ url_for('teams_list') }}" class="text-white">Teams</a></li>
-                    <li><a href="{{ url_for('news_list') }}" class="text-white">News</a></li>
+                    <li><a href="{{ url_for('home') }}" class="text-white">
+                        {% if session.get('language', 'en') == 'ru' %}Главная{% else %}Home{% endif %}
+                    </a></li>
+                    <li><a href="{{ url_for('matches_list') }}" class="text-white">
+                        {% if session.get('language', 'en') == 'ru' %}Матчи{% else %}Matches{% endif %}
+                    </a></li>
+                    <li><a href="{{ url_for('teams_list') }}" class="text-white">
+                        {% if session.get('language', 'en') == 'ru' %}Команды{% else %}Teams{% endif %}
+                    </a></li>
+                    <li><a href="{{ url_for('news_list') }}" class="text-white">
+                        {% if session.get('language', 'en') == 'ru' %}Новости{% else %}News{% endif %}
+                    </a></li>
                 </ul>
             </div>
             <div class="col-md-4">
-                <h5>Connect With Us</h5>
+                <h5>{% if session.get('language', 'en') == 'ru' %}Мы в соцсетях{% else %}Connect With Us{% endif %}</h5>
                 <a href="https://t.me/cshub_official" class="text-white me-2"><i class="bi bi-telegram"></i></a>
                 <a href="https://www.youtube.com/channel/UCXbsUubmNPK8XJFbkmlMcMg" class="text-white"><i
                         class="bi bi-youtube"></i></a>
             </div>
         </div>
         <hr class="bg-light">
-        <p>&copy; {{ current_year }} CounterStrikeHUB. All rights reserved.</p>
+        <p>&copy; {{ current_year }} {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}.
+            {% if session.get('language', 'en') == 'ru' %}
+            Все права защищены
+            {% else %}
+            All rights reserved
+            {% endif %}
+        </p>
     </div>
 </footer>
 

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session.get('language', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CounterStrikeHUB</title>
+    <title>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        /* === ОСНОВНЫЕ СТИЛИ === */
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1560253023-3ec5d502959f');
             background-size: cover;
@@ -16,12 +17,9 @@
             margin-bottom: 30px;
         }
         .card {
-            transition: transform 0.3s;
+            transition: all 0.3s;
             margin-bottom: 20px;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            opacity: 0; /* Начальное состояние для анимации */
         }
         .match-card {
             border-left: 4px solid #0d6efd;
@@ -34,50 +32,153 @@
             color: white;
             padding: 30px 0;
             margin-top: 50px;
+            position: relative;
         }
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
         }
+
+        /* === АНИМАЦИИ === */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade { animation: fadeIn 0.8s ease-out forwards; }
+        .animate-slide { animation: slideUp 0.6s ease-out forwards; }
+        .delay-1 { animation-delay: 0.3s !important; }
+        .delay-2 { animation-delay: 0.6s !important; }
+
+        /* Эффекты при наведении */
+        .hover-effect {
+            transition: all 0.3s ease;
+        }
+        .hover-effect:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Параллакс только на десктопах */
+        @media (min-width: 992px) {
+            .parallax {
+                background-attachment: fixed;
+            }
+        }
+
+        /* Анимация навигации */
+        .nav-link {
+            position: relative;
+            padding-bottom: 3px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #0d6efd;
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Кнопка языка */
+        .language-switcher {
+            display: inline-flex;
+            gap: 5px;
+            margin-right: 15px;
+        }
+        .lang-btn {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .lang-btn.active {
+            background: rgba(255,255,255,0.15);
+        }
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body>
-<!-- Navigation -->
+<!-- Навигация -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="{{ url_for('home') }}">CounterStrikeHUB</a>
+        <a class="navbar-brand hover-effect" href="{{ url_for('home') }}">
+            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
+        </a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="language-switcher me-3">
+                <a href="{{ url_for('set_language', language='en') }}"
+                   class="lang-btn text-white {% if session.get('language', 'en') == 'en' %}active{% endif %}">EN</a>
+                <a href="{{ url_for('set_language', language='ru') }}"
+                   class="lang-btn text-white {% if session.get('language', 'en') == 'ru' %}active{% endif %}">RU</a>
+            </div>
+
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('home') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Главная{% else %}Home{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('matches_list') }}">Matches</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('matches_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Матчи{% else %}Matches{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teams_list') }}">Teams</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('teams_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Команды{% else %}Teams{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('news_list') }}">News</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('news_list') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Новости{% else %}News{% endif %}
+                    </a>
                 </li>
             </ul>
+
             <ul class="navbar-nav">
                 {% if 'user_id' in session %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('profile') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Профиль{% else %}Profile{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('logout') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Выйти{% else %}Logout{% endif %}
+                    </a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('login') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Вход{% else %}Login{% endif %}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    <a class="nav-link hover-effect" href="{{ url_for('register') }}">
+                        {% if session.get('language', 'en') == 'ru' %}Регистрация{% else %}Register{% endif %}
+                    </a>
                 </li>
                 {% endif %}
             </ul>
@@ -85,78 +186,168 @@
     </div>
 </nav>
 
-<!-- Main Content -->
+<!-- Flash-сообщения -->
+<div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show animate-fade">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+<!-- Герой-секция -->
+<div class="hero-section text-center parallax">
+    <div class="container">
+        <h1 class="display-4 fw-bold animate-fade">
+            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
+        </h1>
+        <p class="lead animate-fade delay-1">
+            {% if session.get('language', 'en') == 'ru' %}
+            Ваш универсальный гид в мире CS
+            {% else %}
+            Your universal guide to the world of CS
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- Основной контент -->
 <div class="container">
     {% block content %}
     <div class="row">
-        <!-- Upcoming Matches -->
+        <!-- Ближайшие матчи -->
         <div class="col-md-6">
-            <h2 class="mb-4"><i class="bi bi-calendar-event"></i> Upcoming Matches</h2>
+            <h2 class="mb-4 animate-fade"><i class="bi bi-calendar-event"></i> {% if session.get('language', 'en') == 'ru' %}Ближайшие матчи{% else %}Upcoming Matches{% endif %}</h2>
             {% for match in matches %}
-            <div class="card match-card">
+            <div class="card match-card hover-effect">
                 <div class="card-body">
                     <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ match.formatted_date }}</h6>
                     <p class="card-text">{{ match.description|default('No description available', true) }}</p>
-                    <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-primary">View Details</a>
+                    <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-primary hover-effect">
+                        {% if session.get('language', 'en') == 'ru' %}Подробнее{% else %}View Details{% endif %}
+                    </a>
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info">No upcoming matches scheduled.</div>
+            <div class="alert alert-info animate-fade">
+                {% if session.get('language', 'en') == 'ru' %}
+                Нет запланированных матчей
+                {% else %}
+                No upcoming matches scheduled
+                {% endif %}
+            </div>
             {% endfor %}
-            <a href="{{ url_for('matches_list') }}" class="btn btn-outline-primary mt-2">View All Matches</a>
+            <a href="{{ url_for('matches_list') }}" class="btn btn-outline-primary mt-2 hover-effect">
+                {% if session.get('language', 'en') == 'ru' %}Все матчи{% else %}View All Matches{% endif %}
+            </a>
         </div>
 
-        <!-- Latest News -->
+        <!-- Последние новости -->
         <div class="col-md-6">
-            <h2 class="mb-4"><i class="bi bi-newspaper"></i> Latest News</h2>
+            <h2 class="mb-4 animate-fade delay-1"><i class="bi bi-newspaper"></i> {% if session.get('language', 'en') == 'ru' %}Последние новости{% else %}Latest News{% endif %}</h2>
             {% for item in news %}
-            <div class="card news-card">
+            <div class="card news-card hover-effect">
                 <div class="card-body">
                     <h5 class="card-title">{{ item.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ item.formatted_date }}</h6>
                     <p class="card-text">{{ item.content[:150] }}...</p>
-                    <a href="#" class="btn btn-danger">Read More</a>
+                    <a href="#" class="btn btn-danger hover-effect">
+                        {% if session.get('language', 'en') == 'ru' %}Читать{% else %}Read More{% endif %}
+                    </a>
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info">No news articles available.</div>
+            <div class="alert alert-info animate-fade delay-1">
+                {% if session.get('language', 'en') == 'ru' %}
+                Нет доступных новостей
+                {% else %}
+                No news articles available
+                {% endif %}
+            </div>
             {% endfor %}
-            <a href="{{ url_for('news_list') }}" class="btn btn-outline-danger mt-2">View All News</a>
+            <a href="{{ url_for('news_list') }}" class="btn btn-outline-danger mt-2 hover-effect">
+                {% if session.get('language', 'en') == 'ru' %}Все новости{% else %}View All News{% endif %}
+            </a>
         </div>
     </div>
     {% endblock %}
 </div>
 
-<!-- Footer -->
+<!-- Футер -->
 <footer>
-    <div class="container text-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="w-100" style="position: absolute; top: -1px; left: 0;">
+        <path fill="#343a40" fill-opacity="1" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
+    </svg>
+
+    <div class="container text-center pt-5">
         <div class="row">
-            <div class="col-md-4">
-                <h5>CounterStrikeHUB</h5>
-                <p>Your first step to learning all the news in the CS world</p>
+            <div class="col-md-4 mb-4">
+                <h5>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</h5>
+                <p class="animate-fade">
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Ваш источник новостей о CS
+                    {% else %}
+                    Your CS news source
+                    {% endif %}
+                </p>
             </div>
-            <div class="col-md-4">
-                <h5>Quick Links</h5>
-                <ul class="list-unstyled">
-                    <li><a href="{{ url_for('home') }}" class="text-white">Home</a></li>
-                    <li><a href="{{ url_for('matches_list') }}" class="text-white">Matches</a></li>
-                    <li><a href="{{ url_for('teams_list') }}" class="text-white">Teams</a></li>
-                    <li><a href="{{ url_for('news_list') }}" class="text-white">News</a></li>
+
+            <div class="col-md-4 mb-4">
+                <h5 class="animate-fade delay-1">{% if session.get('language', 'en') == 'ru' %}Быстрые ссылки{% else %}Quick Links{% endif %}</h5>
+                <ul class="list-unstyled animate-fade delay-1">
+                    <li><a href="{{ url_for('home') }}" class="text-white hover-effect">{% if session.get('language', 'en') == 'ru' %}Главная{% else %}Home{% endif %}</a></li>
+                    <li><a href="{{ url_for('matches_list') }}" class="text-white hover-effect">{% if session.get('language', 'en') == 'ru' %}Матчи{% else %}Matches{% endif %}</a></li>
+                    <li><a href="{{ url_for('teams_list') }}" class="text-white hover-effect">{% if session.get('language', 'en') == 'ru' %}Команды{% else %}Teams{% endif %}</a></li>
+                    <li><a href="{{ url_for('news_list') }}" class="text-white hover-effect">{% if session.get('language', 'en') == 'ru' %}Новости{% else %}News{% endif %}</a></li>
                 </ul>
             </div>
-            <div class="col-md-4">
-                <h5>Connect With Us</h5>
-                <a href="https://t.me/cshub_official" class="text-white me-2"><i class="bi bi-telegram"></i></a>
-                <a href="https://www.youtube.com/channel/UCXbsUubmNPK8XJFbkmlMcMg" class="text-white"><i
-                        class="bi bi-youtube"></i></a>
+
+            <div class="col-md-4 mb-4">
+                <h5 class="animate-fade delay-2">{% if session.get('language', 'en') == 'ru' %}Мы в соцсетях{% else %}Connect With Us{% endif %}</h5>
+                <div class="animate-fade delay-2">
+                    <a href="https://t.me/cshub_official" class="text-white me-3 hover-effect" style="font-size: 1.5rem;"><i class="bi bi-telegram"></i></a>
+                    <a href="https://www.youtube.com/channel/UCXbsUubmNPK8XJFbkmlMcMg" class="text-white hover-effect" style="font-size: 1.5rem;"><i class="bi bi-youtube"></i></a>
+                </div>
             </div>
         </div>
+
         <hr class="bg-light">
-        <p>&copy; {{ current_year }} CounterStrikeHUB. All rights reserved.</p>
+
+        <p class="mb-0 animate-fade">
+            &copy; {{ current_year }} {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}.
+            {% if session.get('language', 'en') == 'ru' %}
+            Все права защищены
+            {% else %}
+            All rights reserved
+            {% endif %}
+        </p>
     </div>
 </footer>
 
+<!-- Скрипты -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Активация анимаций при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация карточек с задержкой
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.classList.add('animate-slide');
+            card.style.animationDelay = `${index * 0.15}s`;
+        });
+
+        // Добавляем hover-эффекты всем кнопкам
+        const buttons = document.querySelectorAll('.btn, .nav-link, .hover-effect');
+        buttons.forEach(btn => {
+            btn.classList.add('hover-effect');
+        });
+    });
+</script>
 </body>
 </html>

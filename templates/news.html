@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Upcoming Matches</h2>
+<h2>{% if session.get('language', 'en') == 'ru' %}Ближайшие матчи{% else %}Upcoming Matches{% endif %}</h2>
 <div class="row">
     {% for match in matches %}
     <div class="col-md-6 mb-4">
@@ -12,14 +12,16 @@
                     {{ match.event }}<br>
                     <small class="text-muted">{{ match.time }}</small>
                 </p>
-                <a href="/match/{{ match.id }}" class="btn btn-primary">Details</a>
+                <a href="/match/{{ match.id }}" class="btn btn-primary">
+                    {% if session.get('language', 'en') == 'ru' %}Подробнее{% else %}Details{% endif %}
+                </a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<h2>Latest News</h2>
+<h2>{% if session.get('language', 'en') == 'ru' %}Последние новости{% else %}Latest News{% endif %}</h2>
 {% for item in news %}
 <div class="card mb-3">
     <div class="card-body">

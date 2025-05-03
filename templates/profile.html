@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}{% if session.get('language', 'en') == 'ru' %}Профиль{% else %}Profile{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="card">
         <div class="card-header">
-            <h3>User Profile: {{ username }}</h3>
+            <h3>
+                {% if session.get('language', 'en') == 'ru' %}Профиль пользователя:{% else %}User Profile:{% endif %}
+                {{ username }}
+            </h3>
         </div>
         <div class="card-body">
-            <h4>Your Recent Comments</h4>
+            <h4>{% if session.get('language', 'en') == 'ru' %}Ваши последние комментарии{% else %}Your Recent Comments{% endif %}</h4>
 
             {% if comments %}
                 {% for comment in comments %}
@@ -22,7 +25,13 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p>You haven't posted any comments yet.</p>
+                <p>
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Вы еще не оставляли комментариев.
+                    {% else %}
+                    You haven't posted any comments yet.
+                    {% endif %}
+                </p>
             {% endif %}
         </div>
     </div>
