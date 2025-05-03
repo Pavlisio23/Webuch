@@ -1,31 +1,107 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{% if session.get('language', 'en') == 'ru' %}Все матчи{% else %}All Matches{% endif %}</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>{% if session.get('language', 'en') == 'ru' %}Команда 1{% else %}Team 1{% endif %}</th>
-                <th>{% if session.get('language', 'en') == 'ru' %}Команда 2{% else %}Team 2{% endif %}</th>
-                <th>{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Event{% endif %}</th>
-                <th>{% if session.get('language', 'en') == 'ru' %}Время{% else %}Time{% endif %}</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-            <tr>
-                <td>{{ match.team1 }}</td>
-                <td>{{ match.team2 }}</td>
-                <td>{{ match.event }}</td>
-                <td>{{ match.time }}</td>
-                <td>
-                    <a href="/match/{{ match.id }}" class="btn btn-sm btn-info">
-                        {% if session.get('language', 'en') == 'ru' %}Просмотр{% else %}View{% endif %}
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container mt-4 main-content">
+    <h2 class="mb-4 fw-bold text-center" style="color: var(--text-primary);">
+        <i class="bi bi-calendar-event me-2"></i>
+        {% if session.get('language', 'en') == 'ru' %}Все Матчи{% else %}All Matches{% endif %}
+    </h2>
+
+    <div class="table-responsive rounded-3 overflow-hidden" style="box-shadow: 0 2px 8px rgba(0,0,0,0.1); background-color: var(--card-bg);">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr style="background-color: var(--accent-primary);">
+                    <th class="py-3 fw-bold text-white text-center">{% if session.get('language', 'en') == 'ru' %}Команды{% else %}Teams{% endif %}</th>
+                    <th class="py-3 fw-bold text-white text-center">{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Event{% endif %}</th>
+                    <th class="py-3 fw-bold text-white text-center">{% if session.get('language', 'en') == 'ru' %}Дата и время{% else %}Date & Time{% endif %}</th>
+                    <th class="py-3 fw-bold text-white text-center">{% if session.get('language', 'en') == 'ru' %}Детали{% else %}Details{% endif %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for match in matches %}
+                <tr class="animate" style="background-color: var(--card-bg); animation-delay: {{ loop.index0 * 0.05 }}s;">
+                    <td class="py-3 text-center fw-bold" style="color: var(--text-primary);">
+                        {{ match.team1 }} <span class="vs-text">vs</span> {{ match.team2 }}
+                    </td>
+                    <td class="py-3 text-center" style="color: var(--text-primary);">{{ match.event }}</td>
+                    <td class="py-3 text-center" style="color: var(--text-primary);">
+                        <span class="d-block">{{ match.date }}</span>
+                        <span class="d-block">{{ match.time }}</span>
+                    </td>
+                    <td class="py-3 text-center">
+                        <a href="/match/{{ match.id }}" class="btn btn-sm btn-view">
+                            <i class="bi bi-eye me-1"></i>
+                            {% if session.get('language', 'en') == 'ru' %}Просмотр{% else %}View{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Основные стили таблицы */
+    .table {
+        border: 1px solid var(--border-color);
+        margin-bottom: 0;
+        color: var(--text-primary);
+    }
+
+    /* Заголовки таблицы */
+    th {
+        border-bottom: 2px solid var(--border-color) !important;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: var(--accent-primary) !important;
+        color: white !important;
+    }
+
+    /* Ячейки таблицы */
+    td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        background-color: var(--card-bg);
+    }
+
+    /* Стиль для текста "vs" */
+    .vs-text {
+        color: var(--accent-danger);
+        font-weight: bold;
+        padding: 0 8px;
+    }
+
+    /* Убираем границу у последней строки */
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Эффект при наведении */
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-secondary) !important;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Стиль кнопки "Просмотр" */
+    .btn-view {
+        background-color: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: white;
+        min-width: 90px;
+    }
+
+    .btn-view:hover {
+        background-color: var(--accent-primary);
+        opacity: 0.85;
+        color: white;
+    }
+
+    /* Контейнер таблицы */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>
 {% endblock %}

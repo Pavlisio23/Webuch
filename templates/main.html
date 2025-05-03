@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('language', 'en') }}">
+<html lang="{{ session.get('language', 'en') }}" data-bs-theme="{{ session.get('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #0d6efd;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        [data-bs-theme="dark"] {
+            --primary-color: #6ea8fe;
+            --danger-color: #ff6b6b;
+            --dark-color: #1a1a1a;
+            --light-color: #2d2d2d;
+        }
+
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1560253023-3ec5d502959f');
             background-size: cover;
@@ -15,43 +29,72 @@
             padding: 100px 0;
             margin-bottom: 30px;
         }
+
         .card {
             transition: transform 0.3s;
             margin-bottom: 20px;
+            background-color: var(--bs-card-bg);
+            border-color: var(--bs-border-color);
         }
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+
         .match-card {
-            border-left: 4px solid #0d6efd;
+            border-left: 4px solid var(--primary-color);
         }
+
         .news-card {
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid var(--danger-color);
         }
+
         footer {
-            background-color: #343a40;
+            background-color: var(--dark-color);
             color: white;
             padding: 30px 0;
             margin-top: 50px;
         }
+
+        .navbar {
+            background-color: var(--dark-color) !important;
+        }
+
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
         }
+
         .language-switcher {
             display: inline-flex;
             gap: 5px;
             margin-right: 15px;
         }
+
         .language-switcher .active {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--bs-nav-link-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            transition: background-color 0.3s, color 0.3s;
         }
     </style>
 </head>
 <body>
 <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="{{ url_for('home') }}">
             {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
@@ -60,11 +103,16 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <div class="language-switcher">
-                <a href="{{ url_for('set_language', language='en') }}"
-                   class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', language='ru') }}"
-                   class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'ru' %}active{% endif %}">RU</a>
+            <div class="d-flex align-items-center">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="bi {% if session.get('theme', 'light') == 'dark' %}bi-sun{% else %}bi-moon{% endif %}"></i>
+                </button>
+                <div class="language-switcher">
+                    <a href="{{ url_for('set_language', language='en') }}"
+                       class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'en' %}active{% endif %}">EN</a>
+                    <a href="{{ url_for('set_language', language='ru') }}"
+                       class="btn btn-sm btn-outline-light {% if session.get('language', 'en') == 'ru' %}active{% endif %}">RU</a>
+                </div>
             </div>
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
@@ -258,5 +306,39 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Theme switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeToggle = document.getElementById('themeToggle');
+        const icon = themeToggle.querySelector('i');
+
+        // Check saved theme or prefered color scheme
+        const savedTheme = localStorage.getItem('theme') ||
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+        // Apply theme
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            if (theme === 'dark') {
+                icon.classList.remove('bi-moon');
+                icon.classList.add('bi-sun');
+            } else {
+                icon.classList.remove('bi-sun');
+                icon.classList.add('bi-moon');
+            }
+        }
+
+        // Initialize
+        setTheme(savedTheme);
+
+        // Toggle theme
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    });
+</script>
 </body>
 </html>

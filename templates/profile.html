@@ -3,37 +3,148 @@
 {% block title %}{% if session.get('language', 'en') == 'ru' %}Профиль{% else %}Profile{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h3>
-                {% if session.get('language', 'en') == 'ru' %}Профиль пользователя:{% else %}User Profile:{% endif %}
-                {{ username }}
-            </h3>
-        </div>
-        <div class="card-body">
-            <h4>{% if session.get('language', 'en') == 'ru' %}Ваши последние комментарии{% else %}Your Recent Comments{% endif %}</h4>
+<div class="container my-4">
+    <div class="row">
+        <!-- Основная информация профиля -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100" style="border: 2px solid var(--border-color); background-color: var(--card-bg);">
+                <div class="card-header py-3" style="background-color: var(--accent-primary); border-bottom: 2px solid var(--border-color);">
+                    <h3 class="mb-0 text-center text-white">
+                        <i class="bi bi-person-circle me-2"></i>
+                        {% if session.get('language', 'en') == 'ru' %}ПРОФИЛЬ{% else %}PROFILE{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="avatar-placeholder rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                             style="width: 120px; height: 120px; background-color: var(--accent-primary); color: white; font-size: 3rem; border: 3px solid var(--border-color);">
+                            {{ username[0]|upper }}
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-3" style="color: var(--text-primary); letter-spacing: 0.5px;">{{ username }}</h4>
 
-            {% if comments %}
-                {% for comment in comments %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ comment.team1 }} vs {{ comment.team2 }}</h5>
-                        <p class="card-text">{{ comment.text }}</p>
-                        <small class="text-muted">{{ comment.created_at }}</small>
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-lg fw-bold" style="background-color: var(--accent-primary); color: white; border: 2px solid var(--border-color);">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            {% if session.get('language', 'en') == 'ru' %}РЕДАКТИРОВАТЬ{% else %}EDIT PROFILE{% endif %}
+                        </a>
+                        <a href="#" class="btn btn-lg fw-bold" style="background-color: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color);">
+                            <i class="bi bi-gear me-2"></i>
+                            {% if session.get('language', 'en') == 'ru' %}НАСТРОЙКИ{% else %}SETTINGS{% endif %}
+                        </a>
                     </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>
-                    {% if session.get('language', 'en') == 'ru' %}
-                    Вы еще не оставляли комментариев.
+                <div class="card-footer text-center" style="background-color: var(--bg-secondary); border-top: 2px solid var(--border-color);">
+                    <small class="fw-bold" style="color: var(--text-secondary);">
+                        <i class="bi bi-calendar me-1"></i>
+                        {% if session.get('language', 'en') == 'ru' %}
+                        НА CS HUB С {{ join_date }}
+                        {% else %}
+                        ON CS HUB SINCE {{ join_date }}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Комментарии пользователя -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm" style="border: 2px solid var(--border-color); background-color: var(--card-bg);">
+                <div class="card-header py-3" style="background-color: var(--accent-primary); border-bottom: 2px solid var(--border-color);">
+                    <h3 class="mb-0 text-white">
+                        <i class="bi bi-chat-square-text me-2"></i>
+                        {% if session.get('language', 'en') == 'ru' %}ВАШИ КОММЕНТАРИИ{% else %}YOUR COMMENTS{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                        {% for comment in comments %}
+                        <div class="card mb-3 shadow-sm animate" style="animation-delay: {{ loop.index0 * 0.05 }}s; border: 2px solid var(--border-color); background-color: var(--card-bg);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0 fw-bold" style="color: var(--accent-primary); letter-spacing: 0.5px;">
+                                        {{ comment.team1 }} VS {{ comment.team2 }}
+                                    </h5>
+                                    <small class="fw-bold" style="color: var(--text-secondary);">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ comment.created_at }}
+                                    </small>
+                                </div>
+                                <p class="card-text fw-bold mb-3" style="color: var(--text-primary);">{{ comment.text }}</p>
+                                <div class="d-flex justify-content-end gap-3">
+                                    <button class="btn btn-sm fw-bold" style="background-color: var(--accent-primary); color: white; border: 2px solid var(--border-color);">
+                                        <i class="bi bi-pencil me-1"></i>
+                                        {% if session.get('language', 'en') == 'ru' %}ИЗМЕНИТЬ{% else %}EDIT{% endif %}
+                                    </button>
+                                    <button class="btn btn-sm fw-bold" style="background-color: var(--accent-danger); color: white; border: 2px solid var(--border-color);">
+                                        <i class="bi bi-trash me-1"></i>
+                                        {% if session.get('language', 'en') == 'ru' %}УДАЛИТЬ{% else %}DELETE{% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     {% else %}
-                    You haven't posted any comments yet.
+                        <div class="text-center py-4">
+                            <i class="bi bi-chat-square-text fs-1 mb-3" style="color: var(--text-secondary);"></i>
+                            <h5 class="fw-bold mb-3" style="color: var(--text-primary); letter-spacing: 0.5px;">
+                                {% if session.get('language', 'en') == 'ru' %}
+                                ВЫ ЕЩЕ НЕ ОСТАВЛЯЛИ КОММЕНТАРИЕВ
+                                {% else %}
+                                YOU HAVEN'T POSTED ANY COMMENTS YET
+                                {% endif %}
+                            </h5>
+                            <p class="fw-bold mb-4" style="color: var(--text-secondary);">
+                                {% if session.get('language', 'en') == 'ru' %}
+                                НАЧНИТЕ ОБСУЖДЕНИЕ МАТЧЕЙ ПРЯМО СЕЙЧАС!
+                                {% else %}
+                                START DISCUSSING MATCHES NOW!
+                                {% endif %}
+                            </p>
+                            <a href="{{ url_for('matches_list') }}" class="btn btn-lg fw-bold" style="background-color: var(--accent-primary); color: white; border: 2px solid var(--border-color);">
+                                <i class="bi bi-arrow-right me-2"></i>
+                                {% if session.get('language', 'en') == 'ru' %}К СПИСКУ МАТЧЕЙ{% else %}VIEW MATCHES{% endif %}
+                            </a>
+                        </div>
                     {% endif %}
-                </p>
-            {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Специальные стили для страницы профиля */
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .avatar-placeholder {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+        transition: all 0.3s;
+        letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    .animate {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}

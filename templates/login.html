@@ -3,35 +3,40 @@
 {% block title %}{% if session.get('language', 'en') == 'ru' %}Вход{% else %}Login{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>{% if session.get('language', 'en') == 'ru' %}Вход{% else %}Login{% endif %}</h3>
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0" style="background-color: var(--card-bg);">
+                <div class="card-header border-0 py-3" style="background-color: var(--accent-primary);">
+                    <h3 class="mb-0 text-center text-white">
+                        {% if session.get('language', 'en') == 'ru' %}Вход{% else %}Login{% endif %}
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body px-4 py-4">
                     <form method="POST">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-semibold" style="color: var(--text-primary);">
                                 {% if session.get('language', 'en') == 'ru' %}Имя пользователя{% else %}Username{% endif %}
                             </label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <input type="text" class="form-control border-2 py-2" id="username" name="username" required
+                                   style="border-color: var(--border-color); background-color: var(--bg-primary);">
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold" style="color: var(--text-primary);">
                                 {% if session.get('language', 'en') == 'ru' %}Пароль{% else %}Password{% endif %}
                             </label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <input type="password" class="form-control border-2 py-2" id="password" name="password" required
+                                   style="border-color: var(--border-color); background-color: var(--bg-primary);">
                         </div>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn w-100 py-2 fw-bold"
+                                style="background-color: var(--accent-primary); color: white;">
                             {% if session.get('language', 'en') == 'ru' %}Войти{% else %}Login{% endif %}
                         </button>
                     </form>
-                    <div class="mt-3">
-                        <p>
+                    <div class="mt-4 pt-2 text-center">
+                        <p class="mb-0" style="color: var(--text-secondary);">
                             {% if session.get('language', 'en') == 'ru' %}Нет аккаунта?{% else %}Don't have an account?{% endif %}
-                            <a href="{{ url_for('register') }}">
+                            <a href="{{ url_for('register') }}" class="fw-bold" style="color: var(--accent-primary);">
                                 {% if session.get('language', 'en') == 'ru' %}Зарегистрируйтесь{% else %}Register here{% endif %}
                             </a>
                         </p>
@@ -41,4 +46,34 @@
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    a {
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
 {% endblock %}

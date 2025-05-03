@@ -1,34 +1,150 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{% if session.get('language', 'en') == 'ru' %}Ближайшие матчи{% else %}Upcoming Matches{% endif %}</h2>
-<div class="row">
-    {% for match in matches %}
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ match.team1 }} vs {{ match.team2 }}</h5>
-                <p class="card-text">
-                    {{ match.event }}<br>
-                    <small class="text-muted">{{ match.time }}</small>
-                </p>
-                <a href="/match/{{ match.id }}" class="btn btn-primary">
-                    {% if session.get('language', 'en') == 'ru' %}Подробнее{% else %}Details{% endif %}
-                </a>
+<div class="container mt-4">
+    <!-- Секция ближайших матчей -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0" style="color: var(--text-primary);">
+                <i class="bi bi-calendar-event me-2"></i>
+                {% if session.get('language', 'en') == 'ru' %}Ближайшие матчи{% else %}Upcoming Matches{% endif %}
+            </h2>
+            <a href="{{ url_for('matches_list') }}" class="btn btn-outline-primary">
+                {% if session.get('language', 'en') == 'ru' %}Все матчи{% else %}All Matches{% endif %}
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for match in matches %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm animate"
+                     style="animation-delay: {{ loop.index0 * 0.1 }}s; background-color: var(--card-bg);">
+                    <div class="card-header py-3" style="background-color: var(--accent-primary);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-white">{{ match.event }}</span>
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-clock me-1"></i> {{ match.time }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body text-center py-4">
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <div class="text-center mx-3">
+                                <h5 class="mb-2" style="color: var(--text-primary);">{{ match.team1 }}</h5>
+                            </div>
+                            <div class="mx-3">
+                                <span class="fw-bold fs-4" style="color: var(--accent-danger);">vs</span>
+                            </div>
+                            <div class="text-center mx-3">
+                                <h5 class="mb-2" style="color: var(--text-primary);">{{ match.team2 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent text-center pt-0">
+                        <a href="/match/{{ match.id }}" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-eye me-1"></i>
+                            {% if session.get('language', 'en') == 'ru' %}Подробнее{% else %}Details{% endif %}
+                        </a>
+                    </div>
+                </div>
             </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center" style="background-color: var(--bg-secondary);">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Нет запланированных матчей
+                    {% else %}
+                    No upcoming matches scheduled
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-    {% endfor %}
-</div>
 
-<h2>{% if session.get('language', 'en') == 'ru' %}Последние новости{% else %}Latest News{% endif %}</h2>
-{% for item in news %}
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">{{ item.title }}</h5>
-        <p class="card-text">{{ item.description }}</p>
-        <small class="text-muted">{{ item.time }}</small>
+    <!-- Секция последних новостей -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0" style="color: var(--text-primary);">
+                <i class="bi bi-newspaper me-2"></i>
+                {% if session.get('language', 'en') == 'ru' %}Последние новости{% else %}Latest News{% endif %}
+            </h2>
+            <a href="{{ url_for('news_list') }}" class="btn btn-outline-danger">
+                {% if session.get('language', 'en') == 'ru' %}Все новости{% else %}All News{% endif %}
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for item in news %}
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm animate"
+                     style="animation-delay: {{ loop.index0 * 0.1 + 0.2 }}s; background-color: var(--card-bg);">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0" style="color: var(--text-primary);">{{ item.title }}</h5>
+                            <small style="color: var(--text-secondary);">
+                                <i class="bi bi-clock me-1"></i> {{ item.time }}
+                            </small>
+                        </div>
+                        <p class="card-text" style="color: var(--text-secondary);">{{ item.description }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 pt-0">
+                        <a href="/news/{{ item.id }}" class="btn btn-outline-danger w-100 py-2">
+                            {% if session.get('language', 'en') == 'ru' %}Читать далее{% else %}Read more{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center" style="background-color: var(--bg-secondary);">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {% if session.get('language', 'en') == 'ru' %}
+                    Нет доступных новостей
+                    {% else %}
+                    No news available
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
-{% endfor %}
+
+<style>
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid var(--border-color);
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .card-header {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .animate {
+        opacity: 0;
+        animation: fadeIn 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-outline-danger {
+        border-color: var(--accent-danger);
+        color: var(--accent-danger);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: var(--accent-danger);
+        color: white;
+    }
+</style>
 {% endblock %}

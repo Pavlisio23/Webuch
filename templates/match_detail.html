@@ -3,85 +3,165 @@
 {% block title %}{{ match.team1 }} vs {{ match.team2 }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h2>{{ match.team1 }} vs {{ match.team2 }}</h2>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Заголовок страницы -->
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold" style="color: var(--text-primary);">CS Hub</h1>
+                <p class="lead" style="color: var(--text-secondary);">Your universal guide to the world of CS</p>
+                <hr class="my-4" style="border-color: var(--border-color);">
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 text-center">
-                        <h3>{{ match.team1 }}</h3>
-                        <div class="display-4">{{ match.score1 }}</div>
+
+            <!-- Карточка матча -->
+            <div class="card shadow-sm mb-4 border-0" style="background-color: var(--card-bg);">
+                <div class="card-header py-3 border-0" style="background-color: var(--accent-primary);">
+                    <h2 class="mb-0 text-center text-white">{{ match.team1 }} vs {{ match.team2 }}</h2>
+                </div>
+
+                <div class="card-body">
+                    <!-- Счет матча -->
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-5 text-center">
+                            <h3 class="fw-bold" style="color: var(--text-primary);">{{ match.team1 }}</h3>
+                            <div class="display-4 fw-bold" style="color: var(--accent-primary);">{{ match.score1 }}</div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="badge bg-danger py-2 px-3 fs-6">
+                                {% if match.category == 'live' %}
+                                    LIVE
+                                {% else %}
+                                    VS
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="col-md-5 text-center">
+                            <h3 class="fw-bold" style="color: var(--text-primary);">{{ match.team2 }}</h3>
+                            <div class="display-4 fw-bold" style="color: var(--accent-primary);">{{ match.score2 }}</div>
+                        </div>
                     </div>
-                    <div class="col-md-6 text-center">
-                        <h3>{{ match.team2 }}</h3>
-                        <div class="display-4">{{ match.score2 }}</div>
+
+                    <!-- Детали матча -->
+                    <div class="match-details">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong style="color: var(--text-primary);">{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Tournament{% endif %}:</strong></p>
+                                <p style="color: var(--text-secondary);">{{ match.event }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong style="color: var(--text-primary);">{% if session.get('language', 'en') == 'ru' %}Карта{% else %}Map{% endif %}:</strong></p>
+                                <p style="color: var(--text-secondary);">{{ match.map }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong style="color: var(--text-primary);">{% if session.get('language', 'en') == 'ru' %}Дата{% else %}Date{% endif %}:</strong></p>
+                                <p style="color: var(--text-secondary);">{{ match.date }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong style="color: var(--text-primary);">{% if session.get('language', 'en') == 'ru' %}Статус{% else %}Status{% endif %}:</strong></p>
+                                <span class="badge bg-{{ 'danger' if match.category == 'live' else 'warning' }} py-1 px-2">
+                                    {% if match.category == 'live' %}
+                                        {% if session.get('language', 'en') == 'ru' %}В ПРЯМОМ ЭФИРЕ{% else %}LIVE{% endif %}
+                                    {% else %}
+                                        {% if session.get('language', 'en') == 'ru' %}Предстоящий{% else %}Upcoming{% endif %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr>
-                <p><strong>{% if session.get('language', 'en') == 'ru' %}Турнир{% else %}Tournament{% endif %}:</strong> {{ match.event }}</p>
-                <p><strong>{% if session.get('language', 'en') == 'ru' %}Карта{% else %}Map{% endif %}:</strong> {{ match.map }}</p>
-                <p><strong>{% if session.get('language', 'en') == 'ru' %}Время{% else %}Time{% endif %}:</strong> {{ match.date }}</p>
-                <p><strong>{% if session.get('language', 'en') == 'ru' %}Статус{% else %}Status{% endif %}:</strong>
-                    <span class="badge bg-{{ 'success' if match.category == 'live' else 'warning' }}">
-                        {% if match.category == 'live' %}
-                            {% if session.get('language', 'en') == 'ru' %}В ПРЯМОМ ЭФИРЕ{% else %}LIVE{% endif %}
+            </div>
+
+            <!-- Комментарии -->
+            <div class="card shadow-sm border-0" style="background-color: var(--card-bg);">
+                <div class="card-header py-3 border-0" style="background-color: var(--bg-secondary);">
+                    <h3 class="mb-0" style="color: var(--text-primary);">
+                        {% if session.get('language', 'en') == 'ru' %}Комментарии{% else %}Comments{% endif %}
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    {% if 'user_id' in session %}
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <textarea class="form-control border-2" name="comment" rows="3"
+                                      style="border-color: var(--border-color); background-color: var(--bg-primary);"
+                                      placeholder="{% if session.get('language', 'en') == 'ru' %}Ваш комментарий...{% else %}Your comment...{% endif %}" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4 py-2" style="background-color: var(--accent-primary); border: none;">
+                            {% if session.get('language', 'en') == 'ru' %}Отправить{% else %}Submit{% endif %}
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info border-0" style="background-color: var(--bg-secondary); border-left: 3px solid var(--accent-primary);">
+                        {% if session.get('language', 'en') == 'ru' %}
+                        <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
+                           class="fw-bold" style="color: var(--accent-primary);">Войдите</a>, чтобы оставлять комментарии
                         {% else %}
-                            {% if session.get('language', 'en') == 'ru' %}Предстоящий{% else %}Upcoming{% endif %}
+                        <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
+                           class="fw-bold" style="color: var(--accent-primary);">Login</a> to post comments
                         {% endif %}
-                    </span>
-                </p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3>{% if session.get('language', 'en') == 'ru' %}Комментарии{% else %}Comments{% endif %}</h3>
-            </div>
-            <div class="card-body">
-                {% if 'user_id' in session %}
-                <form method="POST" class="mb-4">
-                    <div class="mb-3">
-                        <textarea class="form-control" name="comment" rows="3"
-                                  placeholder="{% if session.get('language', 'en') == 'ru' %}Ваш комментарий...{% else %}Your comment...{% endif %}" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        {% if session.get('language', 'en') == 'ru' %}Отправить{% else %}Submit{% endif %}
-                    </button>
-                </form>
-                {% else %}
-                <div class="alert alert-info">
-                    {% if session.get('language', 'en') == 'ru' %}
-                    <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
-                       class="alert-link">Войдите</a>, чтобы оставлять комментарии
-                    {% else %}
-                    <a href="{{ url_for('login', next=url_for('match_detail', match_id=match.id)) }}"
-                       class="alert-link">Login</a> to post comments
                     {% endif %}
-                </div>
-                {% endif %}
 
-                {% for comment in comments %}
-                <div class="mb-3 comment-box">
-                    <div class="d-flex justify-content-between">
-                        <strong>{{ comment.username }}</strong>
-                        <small class="text-muted">{{ comment.created_at }}</small>
+                    <div class="comments-section">
+                        {% for comment in comments %}
+                        <div class="comment mb-3 p-3 rounded" style="background-color: var(--bg-secondary);">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong style="color: var(--text-primary);">{{ comment.username }}</strong>
+                                <small style="color: var(--text-secondary);">{{ comment.created_at }}</small>
+                            </div>
+                            <p class="mb-0" style="color: var(--text-primary);">{{ comment.text }}</p>
+                        </div>
+                        {% else %}
+                        <p class="text-center py-3" style="color: var(--text-secondary);">
+                            {% if session.get('language', 'en') == 'ru' %}
+                            Пока нет комментариев. Будьте первым!
+                            {% else %}
+                            No comments yet. Be the first!
+                            {% endif %}
+                        </p>
+                        {% endfor %}
                     </div>
-                    <p>{{ comment.text }}</p>
                 </div>
-                {% else %}
-                <p class="text-muted">
-                    {% if session.get('language', 'en') == 'ru' %}
-                    Пока нет комментариев. Будьте первым!
-                    {% else %}
-                    No comments yet. Be the first!
-                    {% endif %}
-                </p>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .match-details {
+        background-color: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .comment {
+        transition: transform 0.2s;
+    }
+
+    .comment:hover {
+        transform: translateX(5px);
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .btn-primary {
+        transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+</style>
 {% endblock %}
