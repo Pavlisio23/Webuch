@@ -143,9 +143,6 @@ def matches_list():
 
 @app.route('/teams')
 def teams_list():
-    # db_sess = db_session.create_session()
-    # teams = db_sess.query(Team).all()
-    # teams = sorted(teams)
     response = requests.get(f'https://hltv-api.vercel.app/api/player.json')
     teams = response.json()
     return render_template('teams.html', teams=teams)
@@ -237,7 +234,7 @@ def bad_request(_):
 def main():
     db_session.global_init("db/news_match_teams.db")
     app.register_blueprint(teams_api.blueprint)
-    app.run(port=5000, host='127.0.0.1')
+    app.run(port=5001, host='127.0.0.1')
 
 
 if __name__ == '__main__':

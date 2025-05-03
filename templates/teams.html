@@ -1,22 +1,33 @@
-
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Team Rankings</h2>
-    <table class="table">
+    <h2>Team Rankings (2025)</h2>
+    <table class="table" style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Team</th>
-                <th>Players</th>
+            <tr style="background-color: #f2f2f2;">
+                <th style="padding: 12px; text-align: left;">Rank</th>
+                <th style="padding: 12px; text-align: left;">Team</th>
+                <th style="padding: 12px; text-align: left;">Players</th>
             </tr>
         </thead>
         <tbody>
             {% for team in teams %}
-            <tr>
-                <td>{{ team.ranking }}</td>
-                <td>{{ team.name }}</td>
-                <td>{{ team.players }}</td>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px;">{{ team.ranking }}</td>
+                <td style="padding: 12px; font-weight: bold;">{{ team.name }}</td>
+                <td style="padding: 12px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        {% for player in team.players %}
+                        <div style="display: flex; align-items: center; gap: 8px; min-width: 200px;">
+                            <img src="{{ player.country.flag }}"
+                                 alt="{{ player.country.name }}"
+                                 style="width: 20px; height: 15px; border: 1px solid #ddd;">
+                            <span style="font-weight: 500;">{{ player.nickname }}</span>
+                            <span style="color: #666; font-size: 0.9em;">({{ player.country.name }})</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
