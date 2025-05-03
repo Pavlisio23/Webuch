@@ -7,6 +7,7 @@ from data import teams_api
 from data.mathes import Match
 from data.teams import Team
 from data.news import News
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'your_very_secret_key_here'  # Замените на реальный секретный ключ!
@@ -130,7 +131,7 @@ def home():
     matches = db_sess.query(Match).all()
     db_sess = db_session.create_session()
     news = db_sess.query(News).all()
-    return render_template('base.html', matches=matches, news=news)
+    return render_template('main.html', matches=matches, news=news)
 
 
 @app.route('/matches')
@@ -142,15 +143,20 @@ def matches_list():
 
 @app.route('/teams')
 def teams_list():
-    db_sess = db_session.create_session()
-    teams = db_sess.query(Team).all()
+    # db_sess = db_session.create_session()
+    # teams = db_sess.query(Team).all()
+    # teams = sorted(teams)
+    response = requests.get(f'https://hltv-api.vercel.app/api/player.json')
+    teams = response.json()
     return render_template('teams.html', teams=teams)
 
 
 @app.route('/news')
 def news_list():
-    db_sess = db_session.create_session()
-    news = db_sess.query(News).all()
+    # db_sess = db_session.create_session()
+    # news = db_sess.query(News).all()
+    response = requests.get(f'https://hltv-api.vercel.app/api/news.json')
+    news = response.json()
     db_sess = db_session.create_session()
     matches = db_sess.query(Match).all()
     return render_template('news.html', news=news, matches=matches)

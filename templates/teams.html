@@ -8,13 +8,15 @@
             <tr>
                 <th>Rank</th>
                 <th>Team</th>
+                <th>Players</th>
             </tr>
         </thead>
         <tbody>
             {% for team in teams %}
             <tr>
-                <td>{{ team.rank }}</td>
+                <td>{{ team.ranking }}</td>
                 <td>{{ team.name }}</td>
+                <td>{{ team.players }}</td>
             </tr>
             {% endfor %}
         </tbody>
