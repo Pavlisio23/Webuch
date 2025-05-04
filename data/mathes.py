@@ -16,3 +16,4 @@ class Match(SqlAlchemyBase, SerializerMixin):
                                       default=datetime.datetime.now)
     event = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     country = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
