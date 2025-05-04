@@ -10,8 +10,14 @@ from data.news import News
 import requests
 
 app = Flask(__name__)
-app.secret_key = 'your_very_secret_key_here'  # Замените на реальный секретный ключ!
+app.secret_key = 'd2f#a1!9xZv3@8cQ'
 api = Api(app)
+
+
+app.config.update(
+    SESSION_COOKIE_SECURE=False,    # True для HTTPS, False для HTTP
+    SESSION_COOKIE_SAMESITE='Lax'   # Или 'None' (если нужен кросс-доменный доступ)
+)
 
 # Конфигурация БД
 DATABASE = 'db/database.db'
@@ -110,7 +116,7 @@ def login():
             session['user_id'] = user['id']
             session['username'] = user['username']
             flash(f'Welcome, {user["username"]}!', 'success')
-            return render_template('profile.html')
+            return redirect(url_for('profile'))  # Изменено на redirect
         else:
             flash('Invalid username or password', 'danger')
 
@@ -216,21 +222,43 @@ def match_detail(match_id):
 
 # Добавленный маршрут профиля
 @app.route('/profile')
-@login_required
 def profile():
     with get_db() as conn:
         user_comments = conn.execute('''
-            SELECT comments.*, matches.team1, matches.team2 
-            FROM comments 
-            JOIN matches ON comments.match_id = matches.id
+            SELECT * FROM comments 
             WHERE user_id = ? 
             ORDER BY created_at DESC 
             LIMIT 5
         ''', (session['user_id'],)).fetchall()
+    return render_template('profile.html', username=session['username'], comments=user_comments)
 
-    return render_template('profile.html',
-                           username=session.get('username'),
-                           comments=user_comments)
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    new_username = request.form.get('username')
+    avatar = request.files.get('avatar')
+
+    # Обновление username
+    with get_db() as conn:
+        conn.execute('UPDATE users SET username = ? WHERE id = ?',
+                     (new_username, session['user_id']))
+        conn.commit()
+
+    # Обработка аватарки (сохранение в static/uploads/)
+    if avatar:
+        filename = f"user_{session['user_id']}.jpg"
+        avatar.save(f'static/uploads/{filename}')
+
+    return jsonify(success=True)
+
+
+@app.route('/delete_comment/<int:comment_id>', methods=['POST'])
+def delete_comment(comment_id):
+    with get_db() as conn:
+        conn.execute('DELETE FROM comments WHERE id = ? AND user_id = ?',
+                     (comment_id, session['user_id']))
+        conn.commit()
+    return jsonify(success=True)
 
 
 @app.errorhandler(400)
@@ -245,4 +273,5 @@ def main():
 
 
 if __name__ == '__main__':
+    init_db()
     main()
