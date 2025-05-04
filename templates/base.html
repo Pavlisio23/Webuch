@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</title>
+    <title>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CounterStrikeHUB{% endif %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -149,7 +149,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand hover-effect" href="{{ url_for('home') }}">
-            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
+            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CounterStrikeHUB{% endif %}
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -239,7 +239,7 @@
 <div class="hero-section text-center parallax">
     <div class="container">
         <h1 class="display-4 fw-bold animate-fade">
-            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}
+            {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CounterStrikeHUB{% endif %}
         </h1>
         <p class="lead animate-fade delay-1">
             {% if session.get('language', 'en') == 'ru' %}
@@ -323,7 +323,7 @@
     <div class="container text-center pt-5">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <h5>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}</h5>
+                <h5>{% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CounterStrikeHUB{% endif %}</h5>
                 <p class="animate-fade">
                     {% if session.get('language', 'en') == 'ru' %}
                     Ваш источник новостей о CS
@@ -355,7 +355,7 @@
         <hr style="background-color: var(--border-color);">
 
         <p class="mb-0 animate-fade">
-            &copy; {{ current_year }} {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CS Hub{% endif %}.
+            &copy; {{ current_year }} {% if session.get('language', 'en') == 'ru' %}CounterStrikeHUB{% else %}CounterStrikeHUB{% endif %}.
             {% if session.get('language', 'en') == 'ru' %}
             Все права защищены
             {% else %}

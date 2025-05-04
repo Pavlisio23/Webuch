@@ -312,7 +312,7 @@ def bad_request(_):
 def main():
     db_session.global_init("db/news_match_teams.db")
     app.register_blueprint(teams_api.blueprint)
-    app.run(port=5001, host='127.0.0.1')
+    app.run(port=5000, host='127.0.0.1')
 
 
 if __name__ == '__main__':
