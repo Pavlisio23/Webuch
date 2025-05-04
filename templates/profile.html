@@ -353,202 +353,124 @@
 </style>
 
 <script>
-    // Инициализация модальных окон
-    const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
-    const editCommentModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+    // Глобальные обработчики ошибок
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded"); // Проверка загрузки
 
-    // Обработчик кнопки редактирования профиля
-    document.getElementById('editProfileBtn').addEventListener('click', function() {
-        editProfileModal.show();
-    });
-
-    // Обработчик кнопки сохранения профиля
-    document.getElementById('saveProfileBtn').addEventListener('click', async function() {
-        const formData = new FormData(document.getElementById('profileForm'));
-
-        try {
-            const response = await fetch('/update_profile', {
-                method: 'POST',
-                body: formData
+        // 1. Редактирование профиля
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function() {
+                console.log("Edit profile clicked");
+                new bootstrap.Modal(document.getElementById('editProfileModal')).show();
             });
+        }
 
-            const result = await response.json();
+        // 2. Сохранение профиля
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        if (saveProfileBtn) {
+            saveProfileBtn.addEventListener('click', async function() {
+                console.log("Saving profile...");
+                const formData = new FormData(document.getElementById('profileForm'));
 
-            if (result.success) {
-                // Обновляем отображение имени пользователя
-                if (result.new_username) {
-                    document.getElementById('usernameDisplay').textContent = result.new_username;
-                    document.getElementById('usernameInput').value = result.new_username;
-                }
+                try {
+                    const response = await fetch('/update_profile', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    console.log("Server response:", result);
 
-                // Обновляем аватар, если он был изменен
-                if (result.avatar_updated) {
-                    const avatarElement = document.getElementById('userAvatar');
-                    if (avatarElement) {
-                        avatarElement.src = result.avatar_url + '?t=' + new Date().getTime();
+                    if (result.success) {
+                        alert("Профиль обновлен!"); // Временное уведомление
+                        location.reload();
                     } else {
-                        const placeholder = document.getElementById('userAvatarPlaceholder');
-                        if (placeholder) {
-                            placeholder.innerHTML = `
-                                <img src="${result.avatar_url}?t=${new Date().getTime()}"
-                                     class="profile-avatar"
-                                     alt="User Avatar"
-                                     id="userAvatar">`;
-                        }
+                        alert("Ошибка: " + (result.message || "Unknown error"));
                     }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    alert("Сетевая ошибка");
                 }
-
-                editProfileModal.hide();
-                showToast('{% if session.get("language", "en") == "ru" %}Профиль успешно обновлен{% else %}Profile updated successfully{% endif %}', 'success');
-            } else {
-                showToast(result.message || '{% if session.get("language", "en") == "ru" %}Ошибка при обновлении профиля{% else %}Error updating profile{% endif %}', 'danger');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showToast('{% if session.get("language", "en") == "ru" %}Ошибка сети{% else %}Network error{% endif %}', 'danger');
-        }
-    });
-
-    // Обработчики для комментариев
-    document.querySelectorAll('.edit-comment').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const commentId = this.dataset.commentId;
-            const commentText = this.dataset.commentText;
-
-            document.getElementById('commentIdInput').value = commentId;
-            document.getElementById('commentTextInput').value = commentText;
-            editCommentModal.show();
-        });
-    });
-
-    document.querySelectorAll('.delete-comment').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const commentId = this.dataset.commentId;
-            const confirmMessage = '{% if session.get("language", "en") == "ru" %}Вы уверены, что хотите удалить этот комментарий?{% else %}Are you sure you want to delete this comment?{% endif %}';
-
-            if (!confirm(confirmMessage)) return;
-
-            try {
-                const response = await fetch(`/delete_comment/${commentId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    document.getElementById(`comment-${commentId}`).remove();
-                    showToast('{% if session.get("language", "en") == "ru" %}Комментарий удален{% else %}Comment deleted{% endif %}', 'success');
-
-                    // Если комментариев не осталось, показываем блок "нет комментариев"
-                    if (document.querySelectorAll('.comment-item').length === 0) {
-                        document.querySelector('.card-body').innerHTML = `
-                            <div class="text-center py-4 no-comments">
-                                <i class="bi bi-chat-square-text fs-1 mb-3"></i>
-                                <h5 class="fw-bold mb-3">
-                                    {% if session.get('language', 'en') == 'ru' %}
-                                    ВЫ ЕЩЕ НЕ ОСТАВЛЯЛИ КОММЕНТАРИЕВ
-                                    {% else %}
-                                    YOU HAVEN'T POSTED ANY COMMENTS YET
-                                    {% endif %}
-                                </h5>
-                                <p class="fw-bold mb-4">
-                                    {% if session.get('language', 'en') == 'ru' %}
-                                    НАЧНИТЕ ОБСУЖДЕНИЕ МАТЧЕЙ ПРЯМО СЕЙЧАС!
-                                    {% else %}
-                                    START DISCUSSING MATCHES NOW!
-                                    {% endif %}
-                                </p>
-                                <a href="{{ url_for('matches_list') }}" class="btn btn-lg btn-view-matches">
-                                    <i class="bi bi-arrow-right me-2"></i>
-                                    {% if session.get('language', 'en') == 'ru' %}К СПИСКУ МАТЧЕЙ{% else %}VIEW MATCHES{% endif %}
-                                </a>
-                            </div>`;
-                    }
-                } else {
-                    showToast('{% if session.get("language", "en") == "ru" %}Ошибка при удалении комментария{% else %}Error deleting comment{% endif %}', 'danger');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('{% if session.get("language", "en") == "ru" %}Ошибка сети{% else %}Network error{% endif %}', 'danger');
-            }
-        });
-    });
-
-    // Обработчик сохранения комментария
-    document.getElementById('saveCommentBtn').addEventListener('click', async function() {
-        const commentId = document.getElementById('commentIdInput').value;
-        const newText = document.getElementById('commentTextInput').value;
-
-        if (!newText.trim()) {
-            showToast('{% if session.get("language", "en") == "ru" %}Текст комментария не может быть пустым{% else %}Comment text cannot be empty{% endif %}', 'danger');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/update_comment/${commentId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text: newText })
             });
+        }
 
-            const result = await response.json();
+        // 3. Удаление комментариев
+        document.querySelectorAll('.delete-comment').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!confirm("Удалить комментарий?")) return;
 
-            if (result.success) {
-                const commentElement = document.querySelector(`.edit-comment[data-comment-id="${commentId}"]`);
-                if (commentElement) {
-                    commentElement.dataset.commentText = newText;
-                    const commentTextElement = commentElement.closest('.comment-item').querySelector('.comment-text');
-                    if (commentTextElement) {
-                        commentTextElement.textContent = newText;
+                const commentId = this.dataset.commentId;
+                console.log("Deleting comment:", commentId);
+
+                try {
+                    const response = await fetch(`/delete_comment/${commentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const result = await response.json();
+                    console.log("Delete response:", result);
+
+                    if (result.success) {
+                        this.closest('.comment-item').remove();
+                        alert("Комментарий удален");
+                    } else {
+                        alert("Ошибка: " + (result.message || "Unknown error"));
                     }
+                } catch (error) {
+                    console.error("Delete error:", error);
+                    alert("Сетевая ошибка");
                 }
-                editCommentModal.hide();
-                showToast('{% if session.get("language", "en") == "ru" %}Комментарий обновлен{% else %}Comment updated{% endif %}', 'success');
-            } else {
-                showToast(result.message || '{% if session.get("language", "en") == "ru" %}Ошибка при обновлении комментария{% else %}Error updating comment{% endif %}', 'danger');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showToast('{% if session.get("language", "en") == "ru" %}Ошибка сети{% else %}Network error{% endif %}', 'danger');
+            });
+        });
+
+        // 4. Редактирование комментариев
+        document.querySelectorAll('.edit-comment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+                document.getElementById('commentIdInput').value = this.dataset.commentId;
+                document.getElementById('commentTextInput').value = this.dataset.commentText;
+                modal.show();
+            });
+        });
+
+        // 5. Сохранение комментария
+        const saveCommentBtn = document.getElementById('saveCommentBtn');
+        if (saveCommentBtn) {
+            saveCommentBtn.addEventListener('click', async function() {
+                const commentId = document.getElementById('commentIdInput').value;
+                const newText = document.getElementById('commentTextInput').value;
+                console.log("Updating comment:", commentId, newText);
+
+                try {
+                    const response = await fetch(`/update_comment/${commentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: newText })
+                    });
+                    const result = await response.json();
+                    console.log("Update response:", result);
+
+                    if (result.success) {
+                        alert("Комментарий обновлен!");
+                        location.reload();
+                    } else {
+                        alert("Ошибка: " + (result.message || "Unknown error"));
+                    }
+                } catch (error) {
+                    console.error("Update error:", error);
+                    alert("Сетевая ошибка");
+                }
+            });
         }
     });
 
-    // Функция для показа уведомлений
-    function showToast(message, type) {
-        const toastContainer = document.createElement('div');
-        toastContainer.className = `toast-container position-fixed bottom-0 end-0 p-3`;
-        document.body.appendChild(toastContainer);
-
-        const toastElement = document.createElement('div');
-        toastElement.className = `toast show align-items-center text-white bg-${type} border-0`;
-        toastElement.setAttribute('role', 'alert');
-        toastElement.setAttribute('aria-live', 'assertive');
-        toastElement.setAttribute('aria-atomic', 'true');
-
-        toastElement.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>`;
-
-        toastContainer.appendChild(toastElement);
-
-        setTimeout(() => {
-            toastElement.classList.remove('show');
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    // Анимация появления комментариев
-    document.querySelectorAll('.comment-item').forEach((item, index) => {
-        item.style.setProperty('--animation-order', index);
+    // Логирование всех ошибок
+    window.addEventListener('error', function(e) {
+        console.error("Global error:", e.error);
     });
 </script>
 {% endblock %}

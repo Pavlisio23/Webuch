@@ -1,18 +1,22 @@
+import os
 from flask import *
 from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+
+from werkzeug.utils import secure_filename
+
 from data import db_session
 from data import teams_api
 from data.mathes import Match
-from data.teams import Team
+import logging
 from data.news import News
 import requests
 
 app = Flask(__name__)
 app.secret_key = 'd2f#a1!9xZv3@8cQ'
 api = Api(app)
-
+logging.basicConfig(level=logging.DEBUG)
 
 app.config.update(
     SESSION_COOKIE_SECURE=False,    # True для HTTPS, False для HTTP
@@ -233,32 +237,71 @@ def profile():
     return render_template('profile.html', username=session['username'], comments=user_comments)
 
 
+# Обновление профиля
 @app.route('/update_profile', methods=['POST'])
+@login_required
 def update_profile():
-    new_username = request.form.get('username')
-    avatar = request.files.get('avatar')
+    try:
+        logging.debug("Received profile update request")
+        logging.debug(f"Form data: {request.form}")
+        logging.debug(f"Files: {request.files}")
 
-    # Обновление username
-    with get_db() as conn:
-        conn.execute('UPDATE users SET username = ? WHERE id = ?',
-                     (new_username, session['user_id']))
-        conn.commit()
+        new_username = request.form.get('username')
+        avatar = request.files.get('avatar')
 
-    # Обработка аватарки (сохранение в static/uploads/)
-    if avatar:
-        filename = f"user_{session['user_id']}.jpg"
-        avatar.save(f'static/uploads/{filename}')
+        with get_db() as conn:
+            conn.execute('UPDATE users SET username = ? WHERE id = ?',
+                         (new_username, session['user_id']))
 
-    return jsonify(success=True)
+            if avatar and allowed_file(avatar.filename):
+                filename = secure_filename(f"user_{session['user_id']}.jpg")
+                avatar.save(os.path.join('static/uploads', filename))
+
+            conn.commit()
+
+        session['username'] = new_username
+        logging.debug("Profile updated successfully")
+        return jsonify(success=True)
+
+    except Exception as e:
+        logging.error(f"Profile update error: {str(e)}", exc_info=True)
+        return jsonify(success=False, message=str(e))
 
 
+# Удаление комментария
 @app.route('/delete_comment/<int:comment_id>', methods=['POST'])
 def delete_comment(comment_id):
-    with get_db() as conn:
-        conn.execute('DELETE FROM comments WHERE id = ? AND user_id = ?',
-                     (comment_id, session['user_id']))
-        conn.commit()
-    return jsonify(success=True)
+    try:
+        with get_db() as conn:
+            conn.execute('DELETE FROM comments WHERE id = ? AND user_id = ?',
+                         (comment_id, session['user_id']))
+            conn.commit()
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, message=str(e))
+
+
+# Редактирование комментария
+@app.route('/update_comment/<int:comment_id>', methods=['POST'])
+def update_comment(comment_id):
+    new_text = request.json.get('text')
+    if not new_text:
+        return jsonify(success=False, message="Text cannot be empty")
+
+    try:
+        with get_db() as conn:
+            conn.execute('UPDATE comments SET text = ? WHERE id = ? AND user_id = ?',
+                         (new_text, comment_id, session['user_id']))
+            conn.commit()
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, message=str(e))
+
+
+# Проверка расширения файла
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 
 @app.errorhandler(400)
